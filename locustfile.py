@@ -4,6 +4,7 @@ import re
 import json
 import pprint
 from html.parser import HTMLParser
+from bs4 import BeautifulSoup as bs4
 
 class SampleTaskSet(TaskSet):
     def on_start(self):
@@ -16,8 +17,8 @@ class SampleTaskSet(TaskSet):
     def exec(self):
         self.client.get('/')
         response = self.client.get('/posts/create')
-        pprint(response)
-        csrftoken = re.search('input name="_token" value="(.+?)"', response.text)
+        soup = bs4(response.content, 'html.parser')
+        csrftoken = soup.find('input', {'name':'_token'})['value']
         data = { 'title':'テストタイトル', 'body':'テストボディ', '_token':csrftoken }
         self.client.post('/posts', data)
 
